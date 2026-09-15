@@ -1,1 +1,2641 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
+<title>RuChat</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+    --bg: #17181c;
+    --bg2: #1d1e23;
+    --panel: #25262b;
+    --panel2: #2c2d32;
+    --border: #35363c;
+    --text: #f4f4f5;
+    --secondary: #a6a7ad;
+    --muted: #73747b;
+    --blue: #1687ff;
+    --blue-dark: #0878ee;
+    --message-out: #3b70c8;
+    --message-in: #30323b;
+    --danger: #e5484d;
+    --green: #42c76b;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+    color: inherit;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   APP
+========================= */
+
+.app {
+    width: 100%;
+    height: 100dvh;
+    display: flex;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+    width: 390px;
+    min-width: 390px;
+    height: 100%;
+    border-right: 1px solid var(--border);
+    background: #17181c;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 5;
+}
+
+.sidebar-top {
+    padding:
+        max(24px, env(safe-area-inset-top))
+        22px
+        12px
+        22px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.logo {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+}
+
+.profile-mini {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #303137;
+    border: 1px solid #414249;
+    cursor: pointer;
+}
+
+.profile-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.add-chat {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    font-weight: 300;
+    transition: .15s;
+}
+
+.add-chat:active {
+    transform: scale(.92);
+}
+
+.search {
+    width: 100%;
+    height: 50px;
+    background: #2a2b30;
+    border-radius: 15px;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 0 18px;
+    font-size: 19px;
+}
+
+.search::placeholder {
+    color: #9b9ca1;
+}
+
+/* =========================
+   TABS
+========================= */
+
+.tabs {
+    height: 62px;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 18px;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    height: 56px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #a6a7ad;
+    font-size: 18px;
+    white-space: nowrap;
+    position: relative;
+}
+
+.tab.active {
+    color: var(--blue);
+}
+
+.tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    height: 3px;
+    background: var(--blue);
+    border-radius: 3px 3px 0 0;
+}
+
+.badge {
+    min-width: 23px;
+    height: 23px;
+    padding: 0 7px;
+    border-radius: 20px;
+    background: #66676d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tab.active .badge {
+    background: var(--blue);
+}
+
+/* =========================
+   CHAT LIST
+========================= */
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 5px 10px 15px;
+}
+
+.chat-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.chat-list::-webkit-scrollbar-thumb {
+    background: #3b3c42;
+    border-radius: 5px;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 10px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background .12s;
+}
+
+.chat-item:hover {
+    background: #202126;
+}
+
+.chat-item.active {
+    background: #27282e;
+}
+
+.avatar {
+    width: 65px;
+    height: 65px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #303137;
+    position: relative;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.online-dot {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 3px solid var(--bg);
+}
+
+.chat-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.chat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.chat-name {
+    font-size: 19px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-time {
+    color: #8b8c92;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.chat-preview {
+    margin-top: 5px;
+    color: #a3a4a9;
+    font-size: 16px;
+    line-height: 1.25;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unread {
+    min-width: 23px;
+    height: 23px;
+    padding: 0 7px;
+    border-radius: 20px;
+    background: #696a70;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+}
+
+/* =========================
+   BOTTOM NAV
+========================= */
+
+.bottom-nav {
+    height: 82px;
+    min-height: 82px;
+    border-top: 1px solid var(--border);
+    background: #18191d;
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-btn {
+    flex: 1;
+    background: transparent;
+    color: #85868c;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    position: relative;
+}
+
+.nav-icon {
+    font-size: 27px;
+    line-height: 1;
+}
+
+.nav-btn.active {
+    color: var(--blue);
+}
+
+.nav-badge {
+    position: absolute;
+    top: 7px;
+    right: calc(50% - 28px);
+    background: #d94a5a;
+    color: white;
+    border-radius: 15px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+}
+
+/* =========================
+   CHAT WINDOW
+========================= */
+
+.chat-window {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #111216;
+    min-width: 0;
+}
+
+.chat-header {
+    height: 78px;
+    min-height: 78px;
+    border-bottom: 1px solid var(--border);
+    background: #18191d;
+    display: flex;
+    align-items: center;
+    padding: 8px 18px;
+    gap: 14px;
+}
+
+.back-btn {
+    display: none;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    font-size: 35px;
+    color: white;
+}
+
+.chat-header-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #303137;
+    flex-shrink: 0;
+}
+
+.chat-header-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.header-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.header-name {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.header-status {
+    color: #9a9ba1;
+    font-size: 15px;
+    margin-top: 3px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.header-action {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: transparent;
+    font-size: 25px;
+    color: #eee;
+}
+
+.header-action:hover {
+    background: #292a30;
+}
+
+/* =========================
+   MESSAGES
+========================= */
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 20px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background:
+        radial-gradient(circle at 20% 20%, #191a20 0, transparent 40%),
+        #111216;
+}
+
+.messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages::-webkit-scrollbar-thumb {
+    background: #36373c;
+    border-radius: 5px;
+}
+
+.date-divider {
+    align-self: center;
+    background: #363841;
+    color: #eee;
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 14px;
+    margin: 7px 0 12px;
+}
+
+.new-divider {
+    width: 100%;
+    text-align: center;
+    background: #353845;
+    color: #eee;
+    padding: 7px;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.message {
+    max-width: min(72%, 650px);
+    padding: 8px 12px;
+    border-radius: 16px;
+    position: relative;
+    font-size: 18px;
+    line-height: 1.3;
+    word-wrap: break-word;
+}
+
+.message.in {
+    align-self: flex-start;
+    background: var(--message-in);
+    border-bottom-left-radius: 5px;
+}
+
+.message.out {
+    align-self: flex-end;
+    background: var(--message-out);
+    border-bottom-right-radius: 5px;
+}
+
+.message-meta {
+    float: right;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #b9bdc7;
+}
+
+.checks {
+    font-size: 15px;
+}
+
+/* =========================
+   VOICE MESSAGE
+========================= */
+
+.voice-message {
+    min-width: 240px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.voice-play {
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+}
+
+.voice-wave {
+    flex: 1;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.voice-bar {
+    width: 3px;
+    border-radius: 5px;
+    background: #d8dbe2;
+    opacity: .8;
+}
+
+/* =========================
+   COMPOSER
+========================= */
+
+.composer-wrap {
+    padding: 8px 15px max(10px, env(safe-area-inset-bottom));
+    background: #111216;
+}
+
+.composer {
+    min-height: 58px;
+    border-radius: 29px;
+    background: #202126;
+    border: 1px solid #292a2f;
+    display: flex;
+    align-items: center;
+    padding: 5px 8px;
+    gap: 3px;
+}
+
+.composer-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: transparent;
+    color: #aeb0b7;
+    font-size: 25px;
+    flex-shrink: 0;
+}
+
+.composer-btn:hover {
+    background: #2d2e34;
+}
+
+.message-input {
+    flex: 1;
+    min-width: 0;
+    max-height: 120px;
+    resize: none;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: white;
+    font-size: 18px;
+    padding: 9px 5px;
+}
+
+.message-input::placeholder {
+    color: #8d8e94;
+}
+
+.send-btn {
+    background: var(--blue);
+    color: white;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+/* =========================
+   RECORDING
+========================= */
+
+.recording {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 12px;
+}
+
+.recording-dot {
+    width: 12px;
+    height: 12px;
+    background: #e5484d;
+    border-radius: 50%;
+    animation: recordingPulse 1s infinite;
+}
+
+@keyframes recordingPulse {
+    50% {
+        opacity: .3;
+    }
+}
+
+.recording-time {
+    color: white;
+    font-size: 17px;
+}
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #8b8c92;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #292a30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 43px;
+    margin-bottom: 18px;
+}
+
+.empty-title {
+    color: #ddd;
+    font-size: 22px;
+    margin-bottom: 7px;
+}
+
+/* =========================
+   MODALS
+========================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0,0,0,.68);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal {
+    width: min(450px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: #222328;
+    border: 1px solid #35363c;
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+
+.modal-input {
+    width: 100%;
+    height: 52px;
+    background: #303137;
+    border: 1px solid #414249;
+    border-radius: 13px;
+    outline: none;
+    color: white;
+    padding: 0 15px;
+    margin-bottom: 12px;
+}
+
+.modal-input:focus {
+    border-color: #5c5d63;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.modal-btn {
+    flex: 1;
+    height: 48px;
+    border-radius: 13px;
+    background: #35363c;
+}
+
+.modal-btn.primary {
+    background: var(--blue);
+}
+
+.modal-btn.danger {
+    background: var(--danger);
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+.profile-big {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 15px;
+}
+
+.profile-big img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-name {
+    text-align: center;
+    font-size: 23px;
+    font-weight: 600;
+}
+
+.profile-status {
+    text-align: center;
+    color: var(--secondary);
+    margin-top: 4px;
+    margin-bottom: 20px;
+}
+
+.setting-row {
+    width: 100%;
+    min-height: 55px;
+    border-bottom: 1px solid #34353a;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #eee;
+}
+
+.setting-row span:last-child {
+    color: #929399;
+}
+
+/* =========================
+   CALL SCREEN
+========================= */
+
+.call-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: #17181c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.call-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 22px;
+}
+
+.call-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.call-name {
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.call-status {
+    color: #9b9ca2;
+    margin-top: 7px;
+}
+
+.call-buttons {
+    display: flex;
+    gap: 22px;
+    margin-top: 80px;
+}
+
+.call-button {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #303137;
+    font-size: 26px;
+}
+
+.call-button.end {
+    background: var(--danger);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 800px) {
+
+    .sidebar {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .chat-window {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        transform: translateX(100%);
+        transition: transform .2s ease;
+    }
+
+    .chat-window.open {
+        transform: translateX(0);
+    }
+
+    .back-btn {
+        display: block;
+    }
+
+    .chat-header {
+        height: 76px;
+        min-height: 76px;
+        padding-top: max(8px, env(safe-area-inset-top));
+    }
+
+    .sidebar-top {
+        padding-top: max(20px, env(safe-area-inset-top));
+    }
+
+    .logo {
+        font-size: 36px;
+    }
+
+    .message {
+        max-width: 82%;
+        font-size: 17px;
+    }
+
+    .messages {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+@media (min-width: 801px) {
+    .mobile-only {
+        display: none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ======================
+         СПИСОК ЧАТОВ
+    ======================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-top">
+
+            <div class="sidebar-header">
+
+                <div class="logo">
+                    Чаты
+                </div>
+
+                <div style="display:flex;align-items:center;gap:12px;">
+
+                    <div class="profile-mini" onclick="openProfile()">
+                        <img id="miniAvatar"
+                             src="https://i.pravatar.cc/150?img=12">
+                    </div>
+
+                    <button class="add-chat"
+                            onclick="openNewChat()">
+                        +
+                    </button>
+
+                </div>
+
+            </div>
+
+            <input
+                id="searchInput"
+                class="search"
+                type="text"
+                placeholder="Найти"
+                oninput="searchChats()"
+            >
+
+        </div>
+
+        <div class="tabs">
+
+            <button class="tab active"
+                    onclick="selectTab(this,'all')">
+                Все
+                <span class="badge">2</span>
+            </button>
+
+            <button class="tab"
+                    onclick="selectTab(this,'forum')">
+                Форум
+            </button>
+
+            <button class="tab"
+                    onclick="selectTab(this,'new')">
+                Новые
+                <span class="badge">13</span>
+            </button>
+
+            <button class="tab"
+                    onclick="selectTab(this,'channels')">
+                Каналы
+                <span class="badge">9</span>
+            </button>
+
+        </div>
+
+        <div id="chatList" class="chat-list">
+
+            <!-- Чаты добавляются JS -->
+
+        </div>
+
+        <nav class="bottom-nav">
+
+            <button class="nav-btn"
+                    onclick="showContacts()">
+                <span class="nav-icon">👥</span>
+                <span>Контакты</span>
+            </button>
+
+            <button class="nav-btn"
+                    onclick="showCalls()">
+                <span class="nav-icon">☎</span>
+                <span>Звонки</span>
+            </button>
+
+            <button class="nav-btn active"
+                    onclick="showChats()">
+                <span class="nav-icon">💬</span>
+                <span>Чаты</span>
+                <span class="nav-badge">2</span>
+            </button>
+
+            <button class="nav-btn"
+                    onclick="openProfile()">
+                <span class="nav-icon">⚙</span>
+                <span>Настройки</span>
+            </button>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- ======================
+         ОКНО ЧАТА
+    ======================= -->
+
+    <main id="chatWindow" class="chat-window">
+
+        <header class="chat-header">
+
+            <button class="back-btn"
+                    onclick="closeChat()">
+                ‹
+            </button>
+
+            <div class="chat-header-avatar">
+                <img id="headerAvatar"
+                     src="https://i.pravatar.cc/150?img=32">
+            </div>
+
+            <div class="header-info">
+
+                <div id="headerName"
+                     class="header-name">
+                    Тигран
+                </div>
+
+                <div id="headerStatus"
+                     class="header-status">
+                    был недавно
+                </div>
+
+            </div>
+
+            <div class="header-actions">
+
+                <button class="header-action"
+                        onclick="startCall('audio')">
+                    ☎
+                </button>
+
+                <button class="header-action"
+                        onclick="startCall('video')">
+                    ▣
+                </button>
+
+                <button class="header-action"
+                        onclick="openSearchInChat()">
+                    ⌕
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <div id="messages"
+             class="messages">
+
+        </div>
+
+
+        <div class="composer-wrap">
+
+            <div id="composer"
+                 class="composer">
+
+                <button class="composer-btn"
+                        onclick="document.getElementById('fileInput').click()">
+                    📎
+                </button>
+
+                <input
+                    id="fileInput"
+                    type="file"
+                    accept="image/*,video/*,.pdf,.doc,.docx"
+                    multiple
+                    hidden
+                    onchange="sendFiles(this.files)"
+                >
+
+                <textarea
+                    id="messageInput"
+                    class="message-input"
+                    rows="1"
+                    placeholder="Сообщение"
+                    oninput="resizeInput(this)"
+                    onkeydown="handleEnter(event)"
+                ></textarea>
+
+                <button class="composer-btn"
+                        id="emojiBtn"
+                        onclick="insertEmoji()">
+                    ☺
+                </button>
+
+                <button class="composer-btn"
+                        id="voiceBtn"
+                        onclick="toggleRecording()">
+                    🎙
+                </button>
+
+                <button class="send-btn hidden"
+                        id="sendBtn"
+                        onclick="sendMessage()">
+                    ➤
+                </button>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================
+     PROFILE MODAL
+========================= -->
+
+<div id="profileModal"
+     class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <div class="profile-big">
+            <img id="profileAvatar"
+                 src="https://i.pravatar.cc/150?img=12">
+        </div>
+
+        <div class="profile-name">
+            Макс Флом
+        </div>
+
+        <div class="profile-status">
+            в сети
+        </div>
+
+        <div class="setting-row">
+            <span>Имя</span>
+            <span>Макс Флом</span>
+        </div>
+
+        <div class="setting-row">
+            <span>Username</span>
+            <span>@maxflom</span>
+        </div>
+
+        <div class="setting-row">
+            <span>Звонки</span>
+            <span>Разрешены</span>
+        </div>
+
+        <div class="setting-row">
+            <span>Уведомления</span>
+            <span>Включены</span>
+        </div>
+
+        <div class="modal-buttons">
+
+            <button class="modal-btn"
+                    onclick="closeModal('profileModal')">
+                Закрыть
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     NEW CHAT
+========================= -->
+
+<div id="newChatModal"
+     class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <div class="modal-title">
+            Новый чат
+        </div>
+
+        <input
+            id="newChatName"
+            class="modal-input"
+            placeholder="Имя пользователя"
+        >
+
+        <input
+            id="newChatUsername"
+            class="modal-input"
+            placeholder="@username"
+        >
+
+        <div class="modal-buttons">
+
+            <button class="modal-btn"
+                    onclick="closeModal('newChatModal')">
+                Отмена
+            </button>
+
+            <button class="modal-btn primary"
+                    onclick="createChat()">
+                Создать
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     CALL SCREEN
+========================= -->
+
+<div id="callScreen"
+     class="call-screen hidden">
+
+    <div class="call-avatar">
+        <img id="callAvatar"
+             src="https://i.pravatar.cc/150?img=32">
+    </div>
+
+    <div id="callName"
+         class="call-name">
+        Тигран
+    </div>
+
+    <div id="callStatus"
+         class="call-status">
+        Вызов...
+    </div>
+
+    <div class="call-buttons">
+
+        <button class="call-button">
+            🎙
+        </button>
+
+        <button class="call-button">
+            🔊
+        </button>
+
+        <button class="call-button end"
+                onclick="endCall()">
+            ☎
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   ДАННЫЕ RUCHAT
+===================================================== */
+
+const defaultChats = [
+    {
+        id: "tigran",
+        name: "Тигран Лалаян",
+        username: "@tigran",
+        avatar: "https://i.pravatar.cc/150?img=32",
+        status: "был недавно",
+        type: "all",
+        time: "23:14",
+        unread: 0,
+        messages: [
+            {
+                text: "Привет",
+                time: "23:10",
+                out: false
+            },
+            {
+                text: "Привет! Как дела?",
+                time: "23:10",
+                out: true
+            },
+            {
+                text: "Нормально",
+                time: "23:11",
+                out: false
+            },
+            {
+                text: "Что делаешь?",
+                time: "23:11",
+                out: true
+            },
+            {
+                text: "Сижу дома",
+                time: "23:12",
+                out: false
+            }
+        ]
+    },
+
+    {
+        id: "maxflomshop",
+        name: "MAXFLOMSHOP",
+        username: "@maxflomshop",
+        avatar: "https://i.pravatar.cc/150?img=11",
+        status: "канал",
+        type: "channels",
+        time: "7 сент.",
+        unread: 0,
+        messages: [
+            {
+                text: "Добро пожаловать в MAXFLOMSHOP",
+                time: "12:20",
+                out: false
+            }
+        ]
+    },
+
+    {
+        id: "news",
+        name: "Новости RuChat",
+        username: "@ruchat_news",
+        avatar: "https://i.pravatar.cc/150?img=47",
+        status: "канал",
+        type: "channels",
+        time: "14:55",
+        unread: 13,
+        messages: [
+            {
+                text: "Добро пожаловать в RuChat!",
+                time: "14:55",
+                out: false
+            }
+        ]
+    }
+];
+
+
+let chats = JSON.parse(
+    localStorage.getItem("ruchat_chats")
+) || defaultChats;
+
+let currentChat = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let recordingStart = 0;
+let recordingTimer = null;
+
+
+/* =====================================================
+   САХРАНЕНИЕ
+===================================================== */
+
+function saveChats() {
+    localStorage.setItem(
+        "ruchat_chats",
+        JSON.stringify(chats)
+    );
+}
+
+
+/* =====================================================
+   CHAT LIST
+===================================================== */
+
+function renderChats(filter = "") {
+
+    const list = document.getElementById("chatList");
+
+    list.innerHTML = "";
+
+    let result = chats.filter(chat => {
+
+        const text =
+            chat.name.toLowerCase() +
+            " " +
+            chat.username.toLowerCase();
+
+        return text.includes(filter.toLowerCase());
+
+    });
+
+    result.forEach(chat => {
+
+        const item = document.createElement("div");
+
+        item.className =
+            "chat-item" +
+            (currentChat &&
+             currentChat.id === chat.id
+                ? " active"
+                : "");
+
+        item.onclick = () => openChat(chat.id);
+
+        const unread =
+            chat.unread > 0
+                ? `<span class="unread">${chat.unread}</span>`
+                : "";
+
+        const last =
+            chat.messages &&
+            chat.messages.length
+                ? chat.messages[chat.messages.length - 1]
+                : null;
+
+        let preview = last
+            ? last.text || "🎙 Голосовое сообщение"
+            : "Нет сообщений";
+
+        if (last && last.type === "voice") {
+            preview = "🎙 Голосовое сообщение";
+        }
+
+        if (last && last.type === "image") {
+            preview = "📷 Фото";
+        }
+
+        item.innerHTML = `
+
+            <div class="avatar">
+
+                <img src="${chat.avatar}">
+
+                ${
+                    chat.status !== "канал"
+                    ? `<span class="online-dot"></span>`
+                    : ""
+                }
+
+            </div>
+
+            <div class="chat-info">
+
+                <div class="chat-row">
+
+                    <div class="chat-name">
+                        ${escapeHTML(chat.name)}
+                    </div>
+
+                    <div class="chat-time">
+                        ${chat.time || ""}
+                    </div>
+
+                </div>
+
+                <div class="chat-preview">
+
+                    ${escapeHTML(preview)}
+
+                    ${unread}
+
+                </div>
+
+            </div>
+
+        `;
+
+        list.appendChild(item);
+
+    });
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+function searchChats() {
+
+    const value =
+        document.getElementById("searchInput").value;
+
+    renderChats(value);
+
+}
+
+
+/* =====================================================
+   TABS
+===================================================== */
+
+function selectTab(button, type) {
+
+    document
+        .querySelectorAll(".tab")
+        .forEach(x => x.classList.remove("active"));
+
+    button.classList.add("active");
+
+    const list = document.getElementById("chatList");
+
+    list.innerHTML = "";
+
+    let filtered;
+
+    if (type === "all") {
+
+        filtered = chats;
+
+    } else {
+
+        filtered = chats.filter(
+            chat => chat.type === type
+        );
+
+    }
+
+    filtered.forEach(chat => {
+
+        const old = chats;
+
+        renderSpecificChat(chat);
+
+    });
+
+}
+
+
+function renderSpecificChat(chat) {
+
+    const list =
+        document.getElementById("chatList");
+
+    const item =
+        document.createElement("div");
+
+    item.className = "chat-item";
+
+    item.onclick = () =>
+        openChat(chat.id);
+
+    const last =
+        chat.messages[chat.messages.length - 1];
+
+    let preview =
+        last
+            ? last.text || "🎙 Голосовое сообщение"
+            : "Нет сообщений";
+
+    if (last?.type === "voice") {
+        preview = "🎙 Голосовое сообщение";
+    }
+
+    item.innerHTML = `
+
+        <div class="avatar">
+
+            <img src="${chat.avatar}">
+
+            ${
+                chat.status !== "канал"
+                ? `<span class="online-dot"></span>`
+                : ""
+            }
+
+        </div>
+
+        <div class="chat-info">
+
+            <div class="chat-row">
+
+                <div class="chat-name">
+                    ${escapeHTML(chat.name)}
+                </div>
+
+                <div class="chat-time">
+                    ${chat.time || ""}
+                </div>
+
+            </div>
+
+            <div class="chat-preview">
+                ${escapeHTML(preview)}
+
+                ${
+                    chat.unread
+                    ? `<span class="unread">${chat.unread}</span>`
+                    : ""
+                }
+            </div>
+
+        </div>
+    `;
+
+    list.appendChild(item);
+
+}
+
+
+/* =====================================================
+   OPEN CHAT
+===================================================== */
+
+function openChat(id) {
+
+    const chat =
+        chats.find(x => x.id === id);
+
+    if (!chat) return;
+
+    currentChat = chat;
+
+    currentChat.unread = 0;
+
+    saveChats();
+
+    document.getElementById("headerName")
+        .textContent = chat.name;
+
+    document.getElementById("headerStatus")
+        .textContent = chat.status;
+
+    document.getElementById("headerAvatar")
+        .src = chat.avatar;
+
+    renderMessages();
+
+    document
+        .getElementById("chatWindow")
+        .classList.add("open");
+
+    renderChats(
+        document.getElementById("searchInput").value
+    );
+
+}
+
+
+/* =====================================================
+   CLOSE CHAT
+===================================================== */
+
+function closeChat() {
+
+    document
+        .getElementById("chatWindow")
+        .classList.remove("open");
+
+}
+
+
+/* =====================================================
+   MESSAGES
+===================================================== */
+
+function renderMessages() {
+
+    const container =
+        document.getElementById("messages");
+
+    container.innerHTML = "";
+
+    if (!currentChat) {
+
+        container.innerHTML = `
+            <div class="empty-chat">
+                <div class="empty-icon">💬</div>
+                <div class="empty-title">
+                    Выберите чат
+                </div>
+                <div>
+                    Начните общение в RuChat
+                </div>
+            </div>
+        `;
+
+        return;
+    }
+
+    const date =
+        document.createElement("div");
+
+    date.className = "date-divider";
+    date.textContent = "Сегодня";
+
+    container.appendChild(date);
+
+
+    currentChat.messages.forEach(message => {
+
+        const element =
+            document.createElement("div");
+
+        element.className =
+            "message " +
+            (message.out ? "out" : "in");
+
+
+        if (message.type === "voice") {
+
+            element.innerHTML = `
+
+                <div class="voice-message">
+
+                    <button class="voice-play"
+                            onclick="playVoice(this)">
+                        ▶
+                    </button>
+
+                    <div class="voice-wave">
+
+                        ${createWave()}
+
+                    </div>
+
+                    <span>
+                        ${message.duration || "0:03"}
+                    </span>
+
+                </div>
+
+                <span class="message-meta">
+                    ${message.time}
+                    ${
+                        message.out
+                        ? `<span class="checks">✓✓</span>`
+                        : ""
+                    }
+                </span>
+
+            `;
+
+        } else if (message.type === "image") {
+
+            element.innerHTML = `
+
+                <img src="${message.src}"
+                     style="
+                        max-width:260px;
+                        max-height:320px;
+                        border-radius:12px;
+                        display:block;
+                     ">
+
+                <span class="message-meta">
+                    ${message.time}
+                    ${
+                        message.out
+                        ? `<span class="checks">✓✓</span>`
+                        : ""
+                    }
+                </span>
+
+            `;
+
+        } else {
+
+            element.innerHTML = `
+
+                ${escapeHTML(message.text)}
+
+                <span class="message-meta">
+
+                    ${message.time}
+
+                    ${
+                        message.out
+                        ? `<span class="checks">✓✓</span>`
+                        : ""
+                    }
+
+                </span>
+
+            `;
+
+        }
+
+        container.appendChild(element);
+
+    });
+
+    container.scrollTop =
+        container.scrollHeight;
+
+}
+
+
+/* =====================================================
+   SEND MESSAGE
+===================================================== */
+
+function sendMessage() {
+
+    if (!currentChat) return;
+
+    const input =
+        document.getElementById("messageInput");
+
+    const text =
+        input.value.trim();
+
+    if (!text) return;
+
+    const now =
+        new Date();
+
+    const time =
+        now.toLocaleTimeString(
+            "ru-RU",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    currentChat.messages.push({
+
+        text: text,
+        time: time,
+        out: true
+
+    });
+
+    currentChat.time = time;
+
+    input.value = "";
+
+    resizeInput(input);
+
+    saveChats();
+
+    renderMessages();
+
+    renderChats();
+
+}
+
+
+/* =====================================================
+   ENTER
+===================================================== */
+
+function handleEnter(event) {
+
+    if (
+        event.key === "Enter" &&
+        !event.shiftKey
+    ) {
+
+        event.preventDefault();
+
+        sendMessage();
+
+    }
+
+}
+
+
+/* =====================================================
+   INPUT RESIZE
+===================================================== */
+
+function resizeInput(input) {
+
+    input.style.height = "auto";
+
+    input.style.height =
+        Math.min(input.scrollHeight, 120)
+        + "px";
+
+    const hasText =
+        input.value.trim().length > 0;
+
+    document
+        .getElementById("sendBtn")
+        .classList.toggle(
+            "hidden",
+            !hasText
+        );
+
+    document
+        .getElementById("voiceBtn")
+        .classList.toggle(
+            "hidden",
+            hasText
+        );
+
+}
+
+
+/* =====================================================
+   EMOJI
+===================================================== */
+
+function insertEmoji() {
+
+    const input =
+        document.getElementById("messageInput");
+
+    input.value += " 😊";
+
+    input.focus();
+
+    resizeInput(input);
+
+}
+
+
+/* =====================================================
+   VOICE RECORDING
+===================================================== */
+
+async function toggleRecording() {
+
+    if (mediaRecorder &&
+        mediaRecorder.state === "recording") {
+
+        stopRecording();
+
+        return;
+
+    }
+
+    try {
+
+        const stream =
+            await navigator.mediaDevices
+                .getUserMedia({
+                    audio: true
+                });
+
+        audioChunks = [];
+
+        mediaRecorder =
+            new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable =
+            event => {
+
+                if (event.data.size > 0) {
+                    audioChunks.push(
+                        event.data
+                    );
+                }
+
+            };
+
+        mediaRecorder.onstop =
+            async () => {
+
+                stream
+                    .getTracks()
+                    .forEach(track =>
+                        track.stop()
+                    );
+
+                const blob =
+                    new Blob(
+                        audioChunks,
+                        {
+                            type:
+                            "audio/webm"
+                        }
+                    );
+
+                const url =
+                    URL.createObjectURL(blob);
+
+                const seconds =
+                    Math.max(
+                        1,
+                        Math.floor(
+                            (Date.now() -
+                             recordingStart) / 1000
+                        )
+                    );
+
+                sendVoiceMessage(
+                    url,
+                    seconds
+                );
+
+            };
+
+        mediaRecorder.start();
+
+        recordingStart =
+            Date.now();
+
+        showRecording();
+
+    } catch (error) {
+
+        alert(
+            "Не удалось получить доступ к микрофону."
+        );
+
+    }
+
+}
+
+
+function showRecording() {
+
+    const composer =
+        document.getElementById("composer");
+
+    composer.innerHTML = `
+
+        <div class="recording">
+
+            <div class="recording-dot"></div>
+
+            <span id="recordingTime"
+                  class="recording-time">
+                0:00
+            </span>
+
+            <span style="color:#999">
+                Запись голосового...
+            </span>
+
+        </div>
+
+        <button class="composer-btn"
+                onclick="stopRecording()">
+            🗑
+        </button>
+
+        <button class="send-btn"
+                onclick="stopRecording()">
+            ➤
+        </button>
+
+    `;
+
+    recordingTimer =
+        setInterval(() => {
+
+            const seconds =
+                Math.floor(
+                    (Date.now() -
+                     recordingStart) / 1000
+                );
+
+            const minutes =
+                Math.floor(seconds / 60);
+
+            const sec =
+                String(seconds % 60)
+                    .padStart(2, "0");
+
+            const element =
+                document.getElementById(
+                    "recordingTime"
+                );
+
+            if (element) {
+
+                element.textContent =
+                    `${minutes}:${sec}`;
+
+            }
+
+        }, 500);
+
+}
+
+
+function stopRecording() {
+
+    if (!mediaRecorder) return;
+
+    if (
+        mediaRecorder.state ===
+        "recording"
+    ) {
+
+        mediaRecorder.stop();
+
+    }
+
+    clearInterval(recordingTimer);
+
+    restoreComposer();
+
+}
+
+
+function restoreComposer() {
+
+    const composer =
+        document.getElementById("composer");
+
+    composer.innerHTML = `
+
+        <button class="composer-btn"
+                onclick="document.getElementById('fileInput').click()">
+            📎
+        </button>
+
+        <input
+            id="fileInput"
+            type="file"
+            accept="image/*,video/*,.pdf,.doc,.docx"
+            multiple
+            hidden
+            onchange="sendFiles(this.files)"
+        >
+
+        <textarea
+            id="messageInput"
+            class="message-input"
+            rows="1"
+            placeholder="Сообщение"
+            oninput="resizeInput(this)"
+            onkeydown="handleEnter(event)"
+        ></textarea>
+
+        <button class="composer-btn"
+                onclick="insertEmoji()">
+            ☺
+        </button>
+
+        <button class="composer-btn"
+                id="voiceBtn"
+                onclick="toggleRecording()">
+            🎙
+        </button>
+
+        <button class="send-btn hidden"
+                id="sendBtn"
+                onclick="sendMessage()">
+            ➤
+        </button>
+    `;
+
+}
+
+
+function sendVoiceMessage(url, seconds) {
+
+    if (!currentChat) return;
+
+    const min =
+        Math.floor(seconds / 60);
+
+    const sec =
+        String(seconds % 60)
+            .padStart(2, "0");
+
+    const time =
+        new Date().toLocaleTimeString(
+            "ru-RU",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+
+    currentChat.messages.push({
+
+        type: "voice",
+
+        src: url,
+
+        duration:
+            `${min}:${sec}`,
+
+        time: time,
+
+        out: true
+
+    });
+
+    currentChat.time = time;
+
+    saveChats();
+
+    renderMessages();
+
+    renderChats();
+
+}
+
+
+/* =====================================================
+   PLAY VOICE
+===================================================== */
+
+function playVoice(button) {
+
+    const message =
+        button.closest(".message");
+
+    const index =
+        [...message.parentElement.children]
+            .indexOf(message) - 1;
+
+    const data =
+        currentChat.messages[index];
+
+    if (!data || !data.src) return;
+
+    const audio =
+        new Audio(data.src);
+
+    button.textContent = "⏸";
+
+    audio.play();
+
+    audio.onended = () => {
+        button.textContent = "▶";
+    };
+
+}
+
+
+/* =====================================================
+   WAVE
+===================================================== */
+
+function createWave() {
+
+    let html = "";
+
+    for (let i = 0; i < 35; i++) {
+
+        const h =
+            Math.floor(
+                Math.random() * 22
+            ) + 5;
+
+        html += `
+            <span class="voice-bar"
+                  style="height:${h}px">
+            </span>
+        `;
+
+    }
+
+    return html;
+
+}
+
+
+/* =====================================================
+   FILES
+===================================================== */
+
+function sendFiles(files) {
+
+    if (!files || !files.length) return;
+
+    [...files].forEach(file => {
+
+        if (
+            file.type.startsWith("image/")
+        ) {
+
+            const reader =
+                new FileReader();
+
+            reader.onload = () => {
+
+                const time =
+                    new Date()
+                        .toLocaleTimeString(
+                            "ru-RU",
+                            {
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            }
+                        );
+
+                currentChat.messages.push({
+
+                    type: "image",
+
+                    src: reader.result,
+
+                    time: time,
+
+                    out: true
+
+                });
+
+                currentChat.time =
+                    time;
+
+                saveChats();
+
+                renderMessages();
+
+                renderChats();
+
+            };
+
+            reader.readAsDataURL(file);
+
+        } else {
+
+            const time =
+                new Date()
+                    .toLocaleTimeString(
+                        "ru-RU",
+                        {
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        }
+                    );
+
+            currentChat.messages.push({
+
+                text:
+                    "📎 " + file.name,
+
+                time: time,
+
+                out: true
+
+            });
+
+            currentChat.time =
+                time;
+
+            saveChats();
+
+            renderMessages();
+
+            renderChats();
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   NEW CHAT
+===================================================== */
+
+function openNewChat() {
+
+    document
+        .getElementById("newChatModal")
+        .classList.remove("hidden");
+
+}
+
+
+function createChat() {
+
+    const name =
+        document
+            .getElementById("newChatName")
+            .value
+            .trim();
+
+    const username =
+        document
+            .getElementById("newChatUsername")
+            .value
+            .trim();
+
+    if (!name) {
+
+        alert("Введите имя.");
+
+        return;
+
+    }
+
+    const chat = {
+
+        id:
+            "chat_" +
+            Date.now(),
+
+        name: name,
+
+        username:
+            username || "@user",
+
+        avatar:
+            "https://i.pravatar.cc/150?u=" +
+            Date.now(),
+
+        status:
+            "был недавно",
+
+        type:
+            "all",
+
+        time: "",
+
+        unread: 0,
+
+        messages: []
+
+    };
+
+    chats.unshift(chat);
+
+    saveChats();
+
+    closeModal("newChatModal");
+
+    document
+        .getElementById("newChatName")
+        .value = "";
+
+    document
+        .getElementById("newChatUsername")
+        .value = "";
+
+    renderChats();
+
+    openChat(chat.id);
+
+}
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+function openProfile() {
+
+    document
+        .getElementById("profileModal")
+        .classList.remove("hidden");
+
+}
+
+
+function closeModal(id) {
+
+    document
+        .getElementById(id)
+        .classList.add("hidden");
+
+}
+
+
+/* =====================================================
+   CALLS
+===================================================== */
+
+function startCall(type) {
+
+    if (!currentChat) return;
+
+    document
+        .getElementById("callAvatar")
+        .src = currentChat.avatar;
+
+    document
+        .getElementById("callName")
+        .textContent = currentChat.name;
+
+    document
+        .getElementById("callStatus")
+        .textContent =
+            type === "video"
+                ? "Видеовызов..."
+                : "Вызов...";
+
+    document
+        .getElementById("callScreen")
+        .classList.remove("hidden");
+
+}
+
+
+function endCall() {
+
+    document
+        .getElementById("callScreen")
+        .classList.add("hidden");
+
+}
+
+
+function showCalls() {
+
+    alert(
+        "Раздел звонков готов. Подключение реальных звонков можно сделать следующим этапом."
+    );
+
+}
+
+
+function showContacts() {
+
+    alert(
+        "Здесь будут контакты RuChat."
+    );
+
+}
+
+
+function showChats() {
+
+    closeChat();
+
+}
+
+
+/* =====================================================
+   SEARCH INSIDE CHAT
+===================================================== */
+
+function openSearchInChat() {
+
+    const query =
+        prompt("Что найти в этом чате?");
+
+    if (!query || !currentChat) return;
+
+    const found =
+        currentChat.messages.find(
+            message =>
+                message.text &&
+                message.text
+                    .toLowerCase()
+                    .includes(
+                        query.toLowerCase()
+                    )
+        );
+
+    if (found) {
+
+        alert(
+            "Найдено сообщение:\n\n" +
+            found.text
+        );
+
+    } else {
+
+        alert(
+            "Сообщение не найдено."
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHTML(text) {
+
+    if (!text) return "";
+
+    return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+renderChats();
+
+if (chats.length > 0) {
+
+    openChat(chats[0].id);
+
+}
+
+</script>
+
+</body>
+</html>
